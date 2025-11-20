@@ -1,0 +1,5 @@
+{
+  "name": "Chrono AI Calendar",
+  "description": "A smart, aesthetic calendar application featuring natural language event creation powered by Gemini 2.5 Flash. Organize your life with intelligent scheduling.",
+  "requestFramePermissions": []
+}

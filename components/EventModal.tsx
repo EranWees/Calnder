@@ -10,6 +10,19 @@ interface EventModalProps {
   existingEvent?: CalendarEvent | null;
 }
 
+const toLocalISOString = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const toLocalTimeString = (date: Date) => {
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
 export const EventModal: React.FC<EventModalProps> = ({ 
   isOpen, onClose, onSave, onDelete, initialDate, existingEvent 
 }) => {
@@ -28,15 +41,14 @@ export const EventModal: React.FC<EventModalProps> = ({
         const start = new Date(existingEvent.startTime);
         const end = new Date(existingEvent.endTime);
         
-        // Helper to format date for input value (YYYY-MM-DD)
-        setStartDate(start.toISOString().split('T')[0]);
-        setStartTime(start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
-        setEndTime(end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
+        setStartDate(toLocalISOString(start));
+        setStartTime(toLocalTimeString(start));
+        setEndTime(toLocalTimeString(end));
         setColor(existingEvent.color);
       } else if (initialDate) {
         setTitle('');
         setDescription('');
-        setStartDate(initialDate.toISOString().split('T')[0]);
+        setStartDate(toLocalISOString(initialDate));
         setStartTime('09:00');
         setEndTime('10:00');
         setColor(EventColor.BLUE);
@@ -49,9 +61,12 @@ export const EventModal: React.FC<EventModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Construct ISO strings
-    const startDateTime = new Date(`${startDate}T${startTime}`);
-    const endDateTime = new Date(`${startDate}T${endTime}`);
+    const [year, month, day] = startDate.split('-').map(Number);
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+
+    const startDateTime = new Date(year, month - 1, day, startHour, startMinute);
+    const endDateTime = new Date(year, month - 1, day, endHour, endMinute);
 
     const newEvent: CalendarEvent = {
       id: existingEvent?.id || crypto.randomUUID(),
@@ -66,13 +81,17 @@ export const EventModal: React.FC<EventModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" role="dialog" aria-modal="true">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in-up">
         <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
           <h3 className="text-lg font-semibold text-slate-800">
             {existingEvent ? 'Edit Event' : 'New Event'}
           </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+          <button 
+            onClick={onClose} 
+            className="text-slate-400 hover:text-slate-600 focus:outline-none focus:text-slate-600"
+            aria-label="Close modal"
+          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
@@ -132,6 +151,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                   type="button"
                   onClick={() => setColor(val)}
                   className={`w-8 h-8 rounded-full border-2 ${val.replace('text-', 'bg-').split(' ')[0].replace('100', '500')} ${color === val ? 'ring-2 ring-offset-2 ring-slate-400' : 'border-transparent'}`}
+                  aria-label={`Select ${key} color`}
                 />
               ))}
             </div>

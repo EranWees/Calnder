@@ -101,6 +101,14 @@ const App: React.FC = () => {
                 <div 
                   key={idx}
                   onClick={() => handleDayClick(item.date)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleDayClick(item.date);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                   className={`
                     min-h-[100px] border-b border-r border-slate-100 p-2 relative group transition-colors
                     ${!item.isCurrentMonth ? 'bg-slate-50/50 text-slate-400' : 'bg-white hover:bg-slate-50 cursor-pointer'}
@@ -121,6 +129,16 @@ const App: React.FC = () => {
                       <div 
                         key={event.id}
                         onClick={(e) => handleEventClick(e, event)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            setEditingEvent(event);
+                            setIsModalOpen(true);
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
                         className={`
                           text-xs px-2 py-1 rounded-md truncate font-medium cursor-pointer
                           transition hover:opacity-80 hover:shadow-sm
@@ -139,7 +157,7 @@ const App: React.FC = () => {
                   </div>
                   
                   {/* Hover Plus Icon */}
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-slate-300 hover:text-brand-500">
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-slate-300 hover:text-brand-500" aria-hidden="true">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                   </div>
                 </div>

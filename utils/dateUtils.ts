@@ -43,15 +43,6 @@ export const getMonthGrid = (year: number, month: number): DateGridItem[] => {
   return grid;
 };
 
-export const formatDate = (date: Date): string => {
-  return date.toLocaleDateString('en-US', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  });
-};
-
 export const formatTime = (isoString: string): string => {
   return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };

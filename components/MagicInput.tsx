@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { parseNaturalLanguageEvent } from '../services/geminiService';
-import { CalendarEvent, EventColor, AIMagicResponse } from '../types';
+import { CalendarEvent, EventColor } from '../types';
 
 interface MagicInputProps {
   onAddEvent: (event: CalendarEvent) => void;
@@ -25,9 +25,8 @@ export const MagicInput: React.FC<MagicInputProps> = ({ onAddEvent, currentDate 
       if (result) {
         // Map AI color string to enum
         let colorEnum = EventColor.BLUE;
-        if (result.colorSuggestion && result.colorSuggestion in EventColor) {
-             // @ts-ignore: accessing enum via string key
-             colorEnum = EventColor[result.colorSuggestion];
+        if (result.colorSuggestion && (result.colorSuggestion in EventColor)) {
+             colorEnum = EventColor[result.colorSuggestion as keyof typeof EventColor];
         }
 
         const newEvent: CalendarEvent = {
@@ -46,6 +45,7 @@ export const MagicInput: React.FC<MagicInputProps> = ({ onAddEvent, currentDate 
         setError("Couldn't understand that. Try 'Lunch tomorrow at 1pm'.");
       }
     } catch (err) {
+      console.error(err);
       setError("AI Service currently unavailable.");
     } finally {
       setIsLoading(false);
@@ -55,7 +55,7 @@ export const MagicInput: React.FC<MagicInputProps> = ({ onAddEvent, currentDate 
   return (
     <div className="mb-6 bg-white rounded-xl p-1.5 shadow-sm border border-slate-200 relative">
        <form onSubmit={handleMagicSubmit} className="flex items-center gap-2">
-          <div className="pl-3 text-brand-500">
+          <div className="pl-3 text-brand-500" aria-hidden="true">
              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
              </svg>
@@ -67,6 +67,7 @@ export const MagicInput: React.FC<MagicInputProps> = ({ onAddEvent, currentDate 
             placeholder="Ask AI: 'Schedule a team sync next Tuesday at 2pm for 1 hour'..."
             className="flex-1 py-2 bg-transparent outline-none text-slate-700 placeholder-slate-400 text-sm"
             disabled={isLoading}
+            aria-label="Natural language event creation"
           />
           <button 
             type="submit" 
@@ -81,7 +82,7 @@ export const MagicInput: React.FC<MagicInputProps> = ({ onAddEvent, currentDate 
           </button>
        </form>
        {error && (
-         <div className="absolute top-full mt-2 left-0 text-xs text-red-500 bg-red-50 px-2 py-1 rounded border border-red-100">
+         <div className="absolute top-full mt-2 left-0 text-xs text-red-500 bg-red-50 px-2 py-1 rounded border border-red-100" role="alert">
            {error}
          </div>
        )}
